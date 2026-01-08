@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>picaso atelier</title>
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+JP" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/picaso.css">
+<body>
+    <div id="atelier_room">
+        <section id="drow_area">
+            <div id="palette">
+                <div id="color_area">
+                    <p>色</p>
+                    <input id="color-palette" type="color" value=#000000>
+                </div>
+
+                <div id="line_width">
+                    <p>太さ</p>
+                    <div id="line_weight_range">
+                        <input type="range" id="line_weight" name="line_weight" min="1" max="10" step="1" value="3">
+                        <p id="current_value_line"></p>
+                    </div>
+
+                </div>
+
+                <!-- <div id="speed_area">
+                    <p>かいてん</p>
+                    <div id="speed_range">
+                        <input type="range" id="speed" name="speed" min="0" max="5" step="1" value="0">
+                        <p id="current_value_speed"></p>
+                    </div>
+                </div> -->
+            </div>
+            <canvas id="drow" width="500" height="500" style="background-color:#FBF9F1; box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25); border-radius: 6px;"></canvas>
+        </section>
+
+        <section id="control_area">
+            <input type="text" id="username" placeholder="あなたのなまえ">
+            <input type="text" id="title" placeholder="作品のタイトル">
+            <button id="php_save_btn">保存して投稿する</button>
+            <br>
+            <br>
+            <button id="clear_btn">絵をけす</button>
+            <button id="go_top">おわる</button>
+        </section>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script>
+
+        // canvas関係
+        //初期化(変数letで宣言)
+        let canvas_mouse_event = false; //スイッチ [ true=線を引く, false=線は引かない ]  ＊＊＊
+        let oldX = 0; //１つ前の座標を代入するための変数
+        let oldY = 0; //１つ前の座標を代入するための変数
+        let bold_line = 3; //ラインの太さをここで指定
+        let color = "#000000"; //ラインの色をここで指定
+        let line_points = []; //線の座標を入れる配列
+        // let spin_speed = 0; // 速さの初期設定
+
+
+        //描画の定義
+        const can = $("#drow")[0];
+        const ctx = can.getContext("2d");
+
+        //mousedown：フラグをTrue
+        $(can).on("mousedown",function(e){
+            oldX = e.offsetX; //MOUSEDOWNしたX横座標取得
+            oldY = e.offsetY; //MOUSEDOWN Y高さ座標取得
+            canvas_mouse_event=true;
+
+            // 配列に開始地点のデータを入れる
+            line_points = [];
+            line_points.push(oldX, oldY);
+        });
+
+        //mousemove：フラグがTrueだったら描く ※e：イベント引数取得
+        $(can).on("mousemove",function(e){
+            if(canvas_mouse_event==true){
+                const px = e.offsetX;
+                const py = e.offsetY;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = bold_line;
+                ctx.beginPath();
+                ctx.lineJoin= "round";
+                ctx.lineCap = "round";
+                ctx.moveTo(oldX, oldY);
+                ctx.lineTo(px, py);
+                ctx.stroke();
+                oldX = px;
+                oldY = py;
+                // 座標を配列に追加
+                line_points.push(px, py);
+            }
+        });
+
+        $(can).on("mouseup", async function(e){
+            canvas_mouse_event=false;                
+            line_points = [];
+        });
+
+        // mouseleave：フラグをFalse (キャンバスからマウスが出たとき)
+        $(can).on("mouseleave",function(e){
+            canvas_mouse_event = false;
+        });
+
+        // mouseenter：再突入時のフラグチェック (より安全にするため)
+        $(can).on("mouseenter",function(e){
+            // マウスボタンが押されたままキャンバス外で離され、再度入ってきた場合の誤作動を防ぐ
+            if (e.buttons !== 1) { // buttons === 1 は左クリックが押されている状態
+                canvas_mouse_event = false;
+            }
+        });
+
+        // 線の太さ、回転の速さのスライダーの数値を表示させる
+        $(document).ready(function(){
+            // 線の太さの初期設定
+            $('#current_value_line').text(bold_line);
+            // 線の太さが変わってもスライダーの数値を表示させる
+            $('#line_weight').on('input', async function(){
+                const new_value = $(this).val();
+                $('#current_value_line').text(new_value);
+                // グローバルに数値型に変更して入れる
+                bold_line = Number(new_value);
+            });
+
+            // // 回転の速さの初期設定
+            // // 別途定義しているのでそれに修正する必要あり
+            // $('#current_value_speed').text(spin_speed+"倍");
+            // // 回転の速さが変わってもスライダーの数値を表示させる
+            // $('#speed').on('input',function(){
+            //     const new_value = $(this).val();
+            //     $('#current_value_speed').text(new_value+"倍");
+            //     // グローバルに数値型に変更して入れる
+            //     spin_speed = Number(new_value);
+            // });
+
+            let color = $('#color-pallet').val();             
+            });
+        
+        // パレットの色が変わった時に、描画色（color）を更新する
+        $('#color-palette').on('input', function() {
+            color = $(this).val();
+        });    
+
+        // PHPへ保存するボタンの処理
+        $('#php_save_btn').on('click', function() {
+            const canvas = document.getElementById('drow');
+            // 絵を文字列に変換
+            const canvas_data = canvas.toDataURL('image/png');
+            const username = $('#username').val();
+            const title = $('#title').val();
+
+            if (!username || !title || !canvas_data) {
+                alert("なまえとタイトルをいれてね！");
+                return;
+            }
+
+            // FormDataを使って PHP(create.php) に送る準備
+            const params = new FormData();
+            params.append('username', username);
+            params.append('title', title);
+            params.append('canvas_data', canvas_data);
+
+            // fetchで create.php を実行しparamsを送る
+            fetch('create.php', {
+                method: 'POST',
+                body: params
+            })
+            .then(response => {
+                alert("アトリエに保存しました！");
+                // 保存が終わったら一覧画面（index.php）へ移動
+                window.location.href = 'index.php';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("保存に失敗しました");
+            });
+        });
+
+        //#clear_btn：クリアーボタンAction
+        $('#clear_btn').on('click',async function(){
+           ctx.beginPath();
+           ctx.clearRect(0, 0, can.width, can.height);
+        });    
+             
+        //go_top：HOMEに戻る
+        $('#go_top').on('click',function(){
+            window.location.href = 'index.php'; 
+        });
+        
+    </script>
+
+</body>
+</html>
