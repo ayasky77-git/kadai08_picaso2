@@ -24,15 +24,15 @@
 
                 </div>
 
-                <div id="speed_area">
+                <!-- <div id="speed_area">
                     <p>かいてん</p>
                     <div id="speed_range">
                         <input type="range" id="speed" name="speed" min="0" max="5" step="1" value="0">
                         <p id="current_value_speed"></p>
                     </div>
-                </div>
+                </div> -->
             </div>
-            <canvas id="drow" width="500" height="500" style="background-color:#fff; box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25); border-radius: 50%; margin-top: 24px;"></canvas>
+            <canvas id="drow" width="500" height="500" style="background-color:#FBF9F1; box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25); border-radius: 6px;"></canvas>
         </section>
 
         <section id="control_area">
@@ -53,107 +53,57 @@
         // canvas関係
         //初期化(変数letで宣言)
         let canvas_mouse_event = false; //スイッチ [ true=線を引く, false=線は引かない ]  ＊＊＊
-        let lastPoint = null;// 直前の「回転後の座標」
+        let oldX = 0; //１つ前の座標を代入するための変数
+        let oldY = 0; //１つ前の座標を代入するための変数
         let bold_line = 3; //ラインの太さをここで指定
         let color = "#000000"; //ラインの色をここで指定
-        let spin_speed = 0; // 速さの初期設定
-        let angle = 0; // 現在の角度
+        let line_points = []; //線の座標を入れる配列
+        // let spin_speed = 0; // 速さの初期設定
 
-        // マウスの現在地を「記憶」するための変数（loopで使います）
-        let currentMouseX = 0;
-        let currentMouseY = 0;
 
-        //描画（表示用）
+        //描画の定義
         const can = $("#drow")[0];
         const ctx = can.getContext("2d");
 
-        //描画（裏キャンバス）
-        const drawCan = document.createElement('canvas');
-        drawCan.width = can.width;
-        drawCan.height = can.height;
-        const drawCtx = drawCan.getContext('2d');
-
-        // キャンバスを円形に切り抜く設定
-        const radius = drawCan.width / 2; // 半径を計算
-        drawCtx.beginPath();
-        drawCtx.arc(radius, radius, radius, 0, Math.PI * 2); // sizeをradiusに変更
-        drawCtx.clip();
-
-        // キャンバスの初期値
-        drawCtx.fillStyle = "#fff";
-        drawCtx.fillRect(0, 0, drawCan.width, drawCan.height);
-
         //mousedown：フラグをTrue
         $(can).on("mousedown",function(e){
-            lastPoint = getRotatedPoint(e.offsetX, e.offsetY, angle);
+            oldX = e.offsetX; //MOUSEDOWNしたX横座標取得
+            oldY = e.offsetY; //MOUSEDOWN Y高さ座標取得
             canvas_mouse_event=true;
+
+            // 配列に開始地点のデータを入れる
+            line_points = [];
+            line_points.push(oldX, oldY);
         });
 
         //mousemove：フラグがTrueだったら描く ※e：イベント引数取得
         $(can).on("mousemove",function(e){
-            currentMouseX = e.offsetX;
-            currentMouseY = e.offsetY;      
-            
-        });
-
-        // 座標変換の関数
-        function getRotatedPoint(x, y, currentAngle) {
-            const rad = -currentAngle * Math.PI / 180; // 角度をラジアンに変換
-            const tx = x - can.width / 2;  // 中心を(0,0)にずらす
-            const ty = y - can.height / 2;
-            // 回転後の座標を計算
-            const rx = tx * Math.cos(rad) - ty * Math.sin(rad);
-            const ry = tx * Math.sin(rad) + ty * Math.cos(rad);
-            return { x: rx + can.width / 2, y: ry + can.height / 2 };
-        }
-
-        // 描画ループ（映写機の役割）
-        function loop() {
-            angle += spin_speed; // 角度を更新
-
-            if (canvas_mouse_event === true && lastPoint) {
-                // 現在のマウス位置を、今の角度で「紙の上」に翻訳
-                const currentPoint = getRotatedPoint(currentMouseX, currentMouseY, angle);
-
-                drawCtx.strokeStyle = color;
-                drawCtx.lineWidth = bold_line;
-                drawCtx.lineCap = "round";
-                drawCtx.beginPath();
-                drawCtx.moveTo(lastPoint.x, lastPoint.y);
-                drawCtx.lineTo(currentPoint.x, currentPoint.y);
-                drawCtx.stroke();
-
-                lastPoint = currentPoint; // 記憶を更新
+            if(canvas_mouse_event==true){
+                const px = e.offsetX;
+                const py = e.offsetY;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = bold_line;
+                ctx.beginPath();
+                ctx.lineJoin= "round";
+                ctx.lineCap = "round";
+                ctx.moveTo(oldX, oldY);
+                ctx.lineTo(px, py);
+                ctx.stroke();
+                oldX = px;
+                oldY = py;
+                // 座標を配列に追加
+                line_points.push(px, py);
             }
-
-            // 表側のキャンバスを一旦真っさらにする
-            ctx.clearRect(0, 0, can.width, can.height);
-
-            // 回転させて裏キャンバスを貼り付ける
-            ctx.save();
-            ctx.translate(can.width / 2, can.height / 2); // 中心に移動
-            ctx.rotate(angle * Math.PI / 180);           // 回転させる
-            ctx.translate(-can.width / 2, -can.height / 2); // 元に戻す
-            ctx.drawImage(drawCan, 0, 0);                 // 裏キャンバスをコピー
-            ctx.restore();
-
-            // 次のフレームを予約（1秒間に60回実行）
-            requestAnimationFrame(loop);
-        }
-
-        // ループを開始する
-        loop();
-
+        });
 
         $(can).on("mouseup", async function(e){
             canvas_mouse_event=false;                
-            lastPoint = null;
+            line_points = [];
         });
 
         // mouseleave：フラグをFalse (キャンバスからマウスが出たとき)
         $(can).on("mouseleave",function(e){
             canvas_mouse_event = false;
-            lastPoint = null;
         });
 
         // mouseenter：再突入時のフラグチェック (より安全にするため)
@@ -161,7 +111,6 @@
             // マウスボタンが押されたままキャンバス外で離され、再度入ってきた場合の誤作動を防ぐ
             if (e.buttons !== 1) { // buttons === 1 は左クリックが押されている状態
                 canvas_mouse_event = false;
-                lastPoint = null;
             }
         });
 
@@ -177,16 +126,16 @@
                 bold_line = Number(new_value);
             });
 
-            // 回転の速さの初期設定
-            // 別途定義しているのでそれに修正する必要あり
-            $('#current_value_speed').text(spin_speed+"倍");
-            // 回転の速さが変わってもスライダーの数値を表示させる
-            $('#speed').on('input',function(){
-                const new_value = $(this).val();
-                $('#current_value_speed').text(new_value+"倍");
-                // グローバルに数値型に変更して入れる
-                spin_speed = Number(new_value);
-            });
+            // // 回転の速さの初期設定
+            // // 別途定義しているのでそれに修正する必要あり
+            // $('#current_value_speed').text(spin_speed+"倍");
+            // // 回転の速さが変わってもスライダーの数値を表示させる
+            // $('#speed').on('input',function(){
+            //     const new_value = $(this).val();
+            //     $('#current_value_speed').text(new_value+"倍");
+            //     // グローバルに数値型に変更して入れる
+            //     spin_speed = Number(new_value);
+            // });
 
             let color = $('#color-pallet').val();             
             });
@@ -200,7 +149,7 @@
         $('#php_save_btn').on('click', function() {
             const canvas = document.getElementById('drow');
             // 絵を文字列に変換
-            const canvas_data = drawCan.toDataURL('image/png');
+            const canvas_data = canvas.toDataURL('image/png');
             const username = $('#username').val();
             const title = $('#title').val();
 
@@ -233,17 +182,8 @@
 
         //#clear_btn：クリアーボタンAction
         $('#clear_btn').on('click',async function(){
-            drawCtx.save(); // 現在の状態（クリップ設定）を保存
-            drawCtx.setTransform(1, 0, 0, 1, 0, 0); // 念のため変形をリセット
-            drawCtx.fillStyle = "#fff";
-            drawCtx.fillRect(0, 0, drawCan.width, drawCan.height);
-            drawCtx.restore(); // 保存した状態を戻す
-            
-            // 表側のキャンバス（見えている画面）を消す
-            ctx.clearRect(0, 0, can.width, can.height);
-            
-            // 描きかけの座標メモも消す
-            lastPoint = null;
+           ctx.beginPath();
+           ctx.clearRect(0, 0, can.width, can.height);
         });    
              
         //go_top：HOMEに戻る

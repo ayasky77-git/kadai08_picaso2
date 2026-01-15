@@ -98,6 +98,7 @@ body{
     border: 1px solid #ddd;
     background: #fff;
     margin: 10px auto;
+    
 }
 
 /* タイトルや名前の微調整 */
@@ -114,6 +115,14 @@ body{
 .card-date {
     font-size: 10px;
     color: #999;
+}
+
+.card-edit {
+    margin: 0px 16px;
+}
+
+.card-delete {
+    margin: 0px 16px;
 }
 
 .recent_art{

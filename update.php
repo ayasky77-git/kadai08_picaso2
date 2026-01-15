@@ -3,6 +3,7 @@ include('function.php');
 
 // usernameとcanvas_dataが揃っていることを確認
 if(
+  !isset($_POST['id']) || $_POST['id']==='' || 
   !isset($_POST['username']) || $_POST['username']==='' || 
   !isset($_POST['title']) || $_POST['title']==='' || 
   !isset($_POST['canvas_data']) || $_POST['canvas_data']===''
@@ -10,6 +11,7 @@ if(
   exit('データがありません');
 }
 
+$id = $_POST['id'];
 $username = $_POST['username'];
 $title = $_POST['title'];
 $canvas_data = $_POST['canvas_data'];
@@ -18,11 +20,12 @@ $canvas_data = $_POST['canvas_data'];
 $pdo = connect_to_db();
 
 // SQL作成&実行
-$sql = 'INSERT INTO drawings (id, username, title, canvas_data, created_at, updated_at, deleted_at) VALUES(Null, :username, :title, :canvas_data, now(),now(),Null);';
+$sql = 'UPDATE drawings SET username=:username, title=:title, canvas_data=:canvas_data ,updated_at=now() WHERE id=:id';
 
 $stmt = $pdo->prepare($sql);
 
 // バインド変数を設定
+$stmt->bindValue(':id', $id, PDO::PARAM_INT);
 $stmt->bindValue(':username', $username, PDO::PARAM_STR);
 $stmt->bindValue(':title', $title, PDO::PARAM_STR);
 $stmt->bindValue(':canvas_data', $canvas_data, PDO::PARAM_STR);

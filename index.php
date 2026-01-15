@@ -1,19 +1,10 @@
 <?php
+include('function.php');
 // DB接続
-$dbn ='mysql:dbname=picaso;charset=utf8mb4;port=3306;host=localhost';
-$user = 'root';
-$pwd = '';
-
-// DB接続
-try {
-  $pdo = new PDO($dbn, $user, $pwd);
-} catch (PDOException $e) {
-  echo json_encode(["db error" => "{$e->getMessage()}"]);
-  exit();
-}
+$pdo = connect_to_db();
 
 // SQL作成&実行（最新の投稿順に並べる）
-$sql = 'SELECT * FROM drawings ORDER BY created_at DESC LIMIT 10';
+$sql = 'SELECT * FROM drawings WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 10';
 
 $stmt = $pdo->prepare($sql);
 
@@ -36,6 +27,8 @@ foreach($result as $record){
   $output .=   "<img src='{$record["canvas_data"]}' class='card-img' style='width:100%; height:180px; object-fit:contain;'>";
   $output .=   "<p class='card-author'>by {$record["username"]}</p>";
   $output .=   "<p class='card-date'>{$record["created_at"]}</p>";
+  $output .=   "<a href='edit.php?id={$record["id"]}'><img class='card-edit' src='./images/edit.png' alt='編集'></a>";
+  $output .=   "<a href='delete.php?id={$record["id"]}'><img class='card-delete' src='./images/trash-2.png' alt='削除'></a>";
   $output .= "</div>";
 }
 ?>
@@ -64,6 +57,13 @@ foreach($result as $record){
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>    
     <script>
+        //削除時
+        $('.card-delete').on('click',function(){
+          if (!confirm('本当に消していいですか？')) {
+          // false だったら、リンク先への移動（削除実行）を中止する
+          return false;
+          }
+        });
         // 画面遷移
         $('#make_atelier').on('click',function () {  
             // 実際にお絵描きする画面（保存機能がある画面）へ

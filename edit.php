@@ -1,3 +1,28 @@
+<?php
+include("function.php");
+
+// id受け取り
+$id = $_GET['id'];
+
+// DB接続
+$pdo = connect_to_db();
+
+
+// SQL実行
+$sql = 'SELECT * FROM drawings WHERE id=:id';
+$stmt = $pdo->prepare($sql);
+$stmt->bindValue(':id', $id, PDO::PARAM_INT);
+try {
+  $status = $stmt->execute();
+} catch (PDOException $e) {
+  echo json_encode(["sql error" => "{$e->getMessage()}"]);
+  exit();
+}
+
+$record = $stmt->fetch(PDO::FETCH_ASSOC);
+
+?>
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -36,9 +61,9 @@
         </section>
 
         <section id="control_area">
-            <input type="text" id="username" placeholder="あなたのなまえ">
-            <input type="text" id="title" placeholder="作品のタイトル">
-            <button id="php_save_btn">保存して投稿する</button>
+            <input type="text" id="username" value="<?=  $record['username'] ?>">
+            <input type="text" id="title" value="<?=  $record['title'] ?>">
+            <button id="php_save_btn">更新して投稿する</button>
             <br>
             <br>
             <button id="clear_btn">絵をけす</button>
@@ -167,6 +192,19 @@
 
         // 線の太さ、回転の速さのスライダーの数値を表示させる
         $(document).ready(function(){
+            // 画像オブジェクトを作成
+            const img = new Image();
+            
+            // PHPから渡された画像データ(Base64)をセット
+            img.src = "<?= $record['canvas_data'] ?>"; 
+
+            // 画像が読み込み終わったら実行
+            img.onload = function() {
+                // 裏キャンバス(drawCtx)に描くことで、自動的にloopで回転
+                drawCtx.drawImage(img, 0, 0, drawCan.width, drawCan.height);
+            };
+
+
             // 線の太さの初期設定
             $('#current_value_line').text(bold_line);
             // 線の太さが変わってもスライダーの数値を表示させる
@@ -198,11 +236,10 @@
 
         // PHPへ保存するボタンの処理
         $('#php_save_btn').on('click', function() {
-            const canvas = document.getElementById('drow');
-            // 絵を文字列に変換
             const canvas_data = drawCan.toDataURL('image/png');
             const username = $('#username').val();
             const title = $('#title').val();
+            const id = "<?= $record['id'] ?>";
 
             if (!username || !title || !canvas_data) {
                 alert("なまえとタイトルをいれてね！");
@@ -211,12 +248,13 @@
 
             // FormDataを使って PHP(create.php) に送る準備
             const params = new FormData();
+            params.append('id', id);
             params.append('username', username);
             params.append('title', title);
             params.append('canvas_data', canvas_data);
 
             // fetchで create.php を実行しparamsを送る
-            fetch('create.php', {
+            fetch('update.php', {
                 method: 'POST',
                 body: params
             })
@@ -227,7 +265,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert("保存に失敗しました");
+                alert("更新に失敗しました");
             });
         });
 
