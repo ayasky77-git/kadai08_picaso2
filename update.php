@@ -20,7 +20,7 @@ $canvas_data = $_POST['canvas_data'];
 $pdo = connect_to_db();
 
 // SQL作成&実行
-$sql = 'UPDATE drawings SET username=:username, title=:title, canvas_data=:canvas_data ,updated_at=now() WHERE id=:id';
+$sql = 'UPDATE picaso_drawings SET username=:username, title=:title, canvas_data=:canvas_data ,updated_at=now() WHERE id=:id';
 
 $stmt = $pdo->prepare($sql);
 

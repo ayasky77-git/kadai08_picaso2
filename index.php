@@ -4,7 +4,7 @@ include('function.php');
 $pdo = connect_to_db();
 
 // SQL作成&実行（最新の投稿順に並べる）
-$sql = 'SELECT * FROM drawings WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 10';
+$sql = 'SELECT * FROM picaso_drawings WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 10';
 
 $stmt = $pdo->prepare($sql);
 

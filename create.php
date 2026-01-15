@@ -18,7 +18,7 @@ $canvas_data = $_POST['canvas_data'];
 $pdo = connect_to_db();
 
 // SQL作成&実行
-$sql = 'INSERT INTO drawings (id, username, title, canvas_data, created_at, updated_at, deleted_at) VALUES(Null, :username, :title, :canvas_data, now(),now(),Null);';
+$sql = 'INSERT INTO picaso_drawings (id, username, title, canvas_data, created_at, updated_at, deleted_at) VALUES(Null, :username, :title, :canvas_data, now(),now(),Null);';
 
 $stmt = $pdo->prepare($sql);
 

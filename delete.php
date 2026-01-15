@@ -14,7 +14,7 @@ $id = $_GET['id'];
 $pdo = connect_to_db();
 
 // SQL実行(論理削除)
-$sql = 'UPDATE drawings SET deleted_at=now() WHERE id=:id';
+$sql = 'UPDATE picaso_drawings SET deleted_at=now() WHERE id=:id';
 $stmt = $pdo->prepare($sql);
 $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 

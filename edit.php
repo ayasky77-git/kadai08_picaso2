@@ -9,7 +9,7 @@ $pdo = connect_to_db();
 
 
 // SQL実行
-$sql = 'SELECT * FROM drawings WHERE id=:id';
+$sql = 'SELECT * FROM picaso_drawings WHERE id=:id';
 $stmt = $pdo->prepare($sql);
 $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 try {
