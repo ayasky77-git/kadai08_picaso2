@@ -1,5 +1,6 @@
 <?php
-include('function.php');
+include("function.php");
+session_start();
 
 // usernameとcanvas_dataが揃っていることを確認
 if(
@@ -7,6 +8,16 @@ if(
   !isset($_POST['title']) || $_POST['title']==='' || 
   !isset($_POST['canvas_data']) || $_POST['canvas_data']===''
 ){
+  exit('データがありません');
+}
+
+// usernameとcanvas_dataが揃っていることを確認
+if(
+  !isset($_POST['username']) || $_POST['username']==='' || 
+  !isset($_POST['title']) || $_POST['title']==='' || 
+  !isset($_POST['canvas_data']) || $_POST['canvas_data']===''
+){
+  http_response_code(401);
   exit('データがありません');
 }
 
@@ -35,6 +46,6 @@ try {
   exit();
 }
 
-// 登録が終わったら、一覧画面（index.php）に移動する
-header('Location:index.php');
+// 登録が終わったら、一覧画面（home.php）に移動する
+header('Location:home.php');
 exit();

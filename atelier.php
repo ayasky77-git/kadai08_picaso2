@@ -1,3 +1,8 @@
+<?php
+include("function.php");
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -36,13 +41,22 @@
         </section>
 
         <section id="control_area">
-            <input type="text" id="username" placeholder="あなたのなまえ">
-            <input type="text" id="title" placeholder="作品のタイトル">
-            <button id="php_save_btn">保存して投稿する</button>
-            <br>
-            <br>
-            <button id="clear_btn">絵をけす</button>
-            <button id="go_top">おわる</button>
+            <?php if (!isset($_SESSION["session_id"]) || $_SESSION["session_id"] !== session_id()) : ?>
+                    <p>保存するにはログインしてね！</p>
+                    <button type="button" id="login_atelier" onclick="window.open('login.php', '_blank');">ログインする</button>
+                    <br>
+                    <br>
+                    <button id="clear_btn">絵をけす</button>
+                    <button id="go_top">おわる</button>
+            <?php else : ?>
+                <input type="text" id="username" placeholder="あなたのなまえ">
+                <input type="text" id="title" placeholder="作品のタイトル">
+                <button id="php_save_btn">保存して投稿する</button>
+                <br>
+                <br>
+                <button id="clear_btn">絵をけす</button>
+                <button id="go_top2">おわる</button>
+            <?php endif; ?>
         </section>
     </div>
 
@@ -195,7 +209,7 @@
         $('#color-palette').on('input', function() {
             color = $(this).val();
         });    
-
+        
         // PHPへ保存するボタンの処理
         $('#php_save_btn').on('click', function() {
             const canvas = document.getElementById('drow');
@@ -222,8 +236,8 @@
             })
             .then(response => {
                 alert("アトリエに保存しました！");
-                // 保存が終わったら一覧画面（index.php）へ移動
-                window.location.href = 'index.php';
+                // 保存が終わったら一覧画面（home.php）へ移動
+                window.location.href = 'home.php';
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -246,9 +260,14 @@
             lastPoint = null;
         });    
              
-        //go_top：HOMEに戻る
+        //go_top：未ログイン用HOMEに戻る
         $('#go_top').on('click',function(){
             window.location.href = 'index.php'; 
+        });
+
+        //go_top2：ログイン済みHOMEに戻る
+        $('#go_top2').on('click',function(){
+            window.location.href = 'home.php'; 
         });
         
     </script>

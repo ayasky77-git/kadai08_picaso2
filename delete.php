@@ -1,5 +1,7 @@
 <?php
-include('function.php');
+include("function.php");
+session_start();
+check_session_id();
 
 // データ受け取り
 if (
@@ -25,6 +27,6 @@ try {
   exit();
 }
 
-header("Location:index.php");
+header("Location:home.php");
 exit();
 ?>

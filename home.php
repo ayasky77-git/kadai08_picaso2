@@ -1,5 +1,7 @@
 <?php
-include('function.php');
+include("function.php");
+session_start();
+check_session_id();
 
 // DB接続
 $pdo = connect_to_db();
@@ -28,6 +30,8 @@ foreach($result as $record){
   $output .=   "<img src='{$record["canvas_data"]}' class='card-img' style='width:100%; height:180px; object-fit:contain;'>";
   $output .=   "<p class='card-author'>by {$record["username"]}</p>";
   $output .=   "<p class='card-date'>{$record["created_at"]}</p>";
+  $output .=   "<a href='edit.php?id={$record["id"]}'><img class='card-edit' src='./images/edit.png' alt='編集'></a>";
+  $output .=   "<a href='delete.php?id={$record["id"]}'><img class='card-delete' src='./images/trash-2.png' alt='削除'></a>";
   $output .= "</div>";
 }
 ?>
@@ -46,7 +50,9 @@ foreach($result as $record){
         <img src="./images/logo.png" alt="logo" id="logo">
         <div id="opening">
             <button id="make_atelier">アトリエにいく</button>
-            <button id="login">ログイン</button>
+            <button id="logout">ログアウト</button>
+
+
         </div>
 
         <h2 class="recent_art">--最近の作品--</h2>
@@ -69,10 +75,10 @@ foreach($result as $record){
             // 実際にお絵描きする画面（保存機能がある画面）へ
             window.location.href = 'atelier.php'; 
         });
-        // ログイン画面遷移
-        $('#login').on('click',function () {  
+        // ログアウト画面遷移
+        $('#logout').on('click',function () {  
             // 実際にお絵描きする画面（保存機能がある画面）へ
-            window.location.href = 'login.php'; 
+            window.location.href = 'logout.php'; 
         });
     </script>
 </body>

@@ -1,5 +1,7 @@
 <?php
-include('function.php');
+include("function.php");
+session_start();
+check_session_id();
 
 // usernameとcanvas_dataが揃っていることを確認
 if(
@@ -39,5 +41,5 @@ try {
 }
 
 // 登録が終わったら、一覧画面（index.php）に移動する
-header('Location:index.php');
+header('Location:home.php');
 exit();

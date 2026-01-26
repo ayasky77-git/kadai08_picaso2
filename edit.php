@@ -1,5 +1,7 @@
 <?php
 include("function.php");
+session_start();
+check_session_id();
 
 // id受け取り
 $id = $_GET['id'];
@@ -260,8 +262,8 @@ $record = $stmt->fetch(PDO::FETCH_ASSOC);
             })
             .then(response => {
                 alert("アトリエに保存しました！");
-                // 保存が終わったら一覧画面（index.php）へ移動
-                window.location.href = 'index.php';
+                // 保存が終わったら一覧画面（home.php）へ移動
+                window.location.href = 'home.php';
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -286,7 +288,7 @@ $record = $stmt->fetch(PDO::FETCH_ASSOC);
              
         //go_top：HOMEに戻る
         $('#go_top').on('click',function(){
-            window.location.href = 'index.php'; 
+            window.location.href = 'home.php'; 
         });
         
     </script>

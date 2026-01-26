@@ -54,7 +54,7 @@ body{
 }
 
 /* index.htmlボタンの設定 */
-#make_atelier{
+#make_atelier,#login,#logout{
     width: 50%;
     max-width: 372px;
     min-width: 195px;
@@ -191,7 +191,7 @@ body{
 }
 
 /* controlエリアのCSS */
-#php_save_btn,#clear_btn,#go_top{
+#php_save_btn,#clear_btn,#go_top,#go_top2,#login_atelier{
     width: 228px;
     height: 36px;
     margin: 16px 0px;
