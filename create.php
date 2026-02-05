@@ -8,15 +8,6 @@ if(
   !isset($_POST['title']) || $_POST['title']==='' || 
   !isset($_POST['canvas_data']) || $_POST['canvas_data']===''
 ){
-  exit('データがありません');
-}
-
-// usernameとcanvas_dataが揃っていることを確認
-if(
-  !isset($_POST['username']) || $_POST['username']==='' || 
-  !isset($_POST['title']) || $_POST['title']==='' || 
-  !isset($_POST['canvas_data']) || $_POST['canvas_data']===''
-){
   http_response_code(401);
   exit('データがありません');
 }

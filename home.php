@@ -3,11 +3,13 @@ include("function.php");
 session_start();
 check_session_id();
 
+$user_id = $_SESSION['user_id'];
+
 // DB接続
 $pdo = connect_to_db();
 
 // SQL作成&実行（最新の投稿順に並べる）
-$sql = 'SELECT * FROM picaso_drawings WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 10';
+$sql = 'SELECT * FROM `picaso_drawings` LEFT OUTER JOIN (SELECT drawings_id, COUNT(id) As like_count From like_table GROUP BY drawings_id) AS result_table ON picaso_drawings.id = result_table.drawings_id WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 10';
 
 $stmt = $pdo->prepare($sql);
 
@@ -30,6 +32,7 @@ foreach($result as $record){
   $output .=   "<img src='{$record["canvas_data"]}' class='card-img' style='width:100%; height:180px; object-fit:contain;'>";
   $output .=   "<p class='card-author'>by {$record["username"]}</p>";
   $output .=   "<p class='card-date'>{$record["created_at"]}</p>";
+  $output .=   "<div class='like'><a href='like_create.php?id={$record["id"]}&user_id={$user_id}'><img class='card-like' src='./images/heart.png' alt='いいね'></a><p class='card-like-font'>{$record["like_count"]}</p></div>";
   $output .=   "<a href='edit.php?id={$record["id"]}'><img class='card-edit' src='./images/edit.png' alt='編集'></a>";
   $output .=   "<a href='delete.php?id={$record["id"]}'><img class='card-delete' src='./images/trash-2.png' alt='削除'></a>";
   $output .= "</div>";

@@ -117,12 +117,20 @@ body{
     color: #999;
 }
 
-.card-edit {
-    margin: 0px 16px;
+.card-edit,.card-delete,.card-like {
+    margin: 8px 16px;
 }
 
-.card-delete {
-    margin: 0px 16px;
+.card-like-font{
+    font-size: 20px;
+}
+
+.like{
+    height: 36px;
+    display: flex;
+    flex-direction:row;
+    justify-content: center;
+    align-items: center;
 }
 
 .recent_art{

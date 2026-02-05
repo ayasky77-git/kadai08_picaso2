@@ -5,7 +5,7 @@ include('function.php');
 $pdo = connect_to_db();
 
 // SQL作成&実行（最新の投稿順に並べる）
-$sql = 'SELECT * FROM picaso_drawings WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 10';
+$sql = 'SELECT * FROM `picaso_drawings` LEFT OUTER JOIN (SELECT drawings_id, COUNT(id) As like_count From like_table GROUP BY drawings_id) AS result_table ON picaso_drawings.id = result_table.drawings_id WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 10';
 
 $stmt = $pdo->prepare($sql);
 
@@ -28,6 +28,7 @@ foreach($result as $record){
   $output .=   "<img src='{$record["canvas_data"]}' class='card-img' style='width:100%; height:180px; object-fit:contain;'>";
   $output .=   "<p class='card-author'>by {$record["username"]}</p>";
   $output .=   "<p class='card-date'>{$record["created_at"]}</p>";
+  $output .=   "<div class='like'><img class='card-like' src='./images/heart.png' alt='いいね'></><p class='card-like-font'>{$record["like_count"]}</p></div>";
   $output .= "</div>";
 }
 ?>
@@ -57,11 +58,13 @@ foreach($result as $record){
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>    
     <script>
-        //削除時
-        $('.card-delete').on('click',function(){
-          if (!confirm('本当に消していいですか？')) {
-          // false だったら、リンク先への移動（削除実行）を中止する
-          return false;
+        //いいねクリック時
+        $('.card-like').on('click',function(){
+          if (confirm('いいねにはログインが必要です')) {
+              window.location.href = 'login.php'; 
+          }else{
+            // false だったら、リンク先への移動（削除実行）を中止する
+            return false;
           }
         });
         // 画面遷移
