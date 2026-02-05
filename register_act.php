@@ -44,7 +44,7 @@ try {
   exit();
 }
 
-header("Location:login.php");
+header("Location:atelier.php");
 exit();
 
 // 次回は見え方の修正、ログイン済みの見せ方（最初はログインのみ編集なし、その後ログアウトとアトリエ）
